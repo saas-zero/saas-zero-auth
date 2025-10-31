@@ -1,0 +1,27 @@
+syntax = "v1"
+
+import "base_resp.api"
+
+type (
+	OauthLoginReq  {}
+	// 统一响应结构
+	OauthLoginResp {
+		BaseResp
+		Data interface{} `json:"data,omitempty"` // 使用omitempty确保没有数据时此字段不会出现在JSON中
+	}
+	OauthCodeResp {
+		BaseResp
+		Data interface{} `json:"data,omitempty"` // 使用omitempty确保没有数据时此字段不会出现在JSON中
+	}
+)
+
+// 定义 SysApis 服务
+service AuthApis {
+	// 定义客户端流式 rpc
+	@handler OauthLogin
+	post /oauth/login (OauthLoginReq) returns (OauthLoginResp)
+
+	@handler OauthCode
+	get /auth/code returns (OauthCodeResp)
+}
+
