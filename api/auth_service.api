@@ -3,11 +3,14 @@ syntax = "v1"
 import "base_resp.api"
 
 type (
-	OauthLoginReq  {}
+	OauthLoginReq {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 	// 统一响应结构
 	OauthLoginResp {
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
+		Code int         `json:"code"`
+		Msg  string      `json:"msg"`
 		Data interface{} `json:"data,omitempty"` // 使用omitempty确保没有数据时此字段不会出现在JSON中
 	}
 )
