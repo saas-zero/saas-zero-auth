@@ -16,7 +16,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/auth/code",
+				Path:    "/oauth/code",
 				Handler: OauthCodeHandler(serverCtx),
 			},
 			{

@@ -31,5 +31,10 @@ func (l *OauthCodeLogic) OauthCode() (resp *types.BaseResp, err error) {
 
 	l.Logger.Infof("OauthCode")
 
-	return
+	// 添加正确的返回值
+	return &types.BaseResp{
+		Code: 0,
+		Msg:  "success",
+		Data: nil,
+	}, nil
 }
