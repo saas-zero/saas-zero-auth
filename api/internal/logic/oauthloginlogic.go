@@ -5,7 +5,7 @@ package logic
 
 import (
 	"context"
-	system_service "github.com/saas-zero/saas-zero-basedata/rpc/apps/system-service"
+	basedata_service "github.com/saas-zero/saas-zero-basedata/rpc/apps"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
@@ -29,7 +29,7 @@ func NewOauthLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OauthL
 
 func (l *OauthLoginLogic) OauthLogin(req *types.OauthLoginReq) (resp *types.OauthLoginResp, err error) {
 	// 通过用户名获取用户信息
-	userReq := &system_service.UserReq{
+	userReq := &basedata_service.UserReq{
 		Username: req.Username,
 	}
 

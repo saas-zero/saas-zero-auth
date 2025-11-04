@@ -3,7 +3,7 @@ module github.com/saas-zero/saas-zero-auth
 go 1.25.3
 
 require (
-	github.com/saas-zero/saas-zero-basedata v1.0.1
+	github.com/saas-zero/saas-zero-basedata v1.0.2
 	github.com/zeromicro/go-zero v1.9.2
 )
 

@@ -29,5 +29,7 @@ func NewOauthCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OauthCo
 func (l *OauthCodeLogic) OauthCode() (resp *types.BaseResp, err error) {
 	// todo: add your logic here and delete this line
 
+	l.Logger.Infof("OauthCode")
+
 	return
 }

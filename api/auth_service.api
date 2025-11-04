@@ -19,7 +19,7 @@ type (
 service AuthApis {
 	// 定义客户端流式 rpc
 	@handler OauthLogin
-	post /oauth/login (OauthLoginReq) returns (OauthLoginResp)
+	post /auth/login (OauthLoginReq) returns (OauthLoginResp)
 
 	@handler OauthCode
 	get /auth/code returns (BaseResp)
