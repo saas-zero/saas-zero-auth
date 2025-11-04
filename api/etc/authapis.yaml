@@ -1,9 +1,9 @@
 Name: AuthApis
 Host: 0.0.0.0
-Port: 8888
+Port: 18081
 
 BaseDataRpc:
   Etcd:
     Hosts:
       - 127.0.0.1:2379
-    Key: systemservice.rpc
+    Key: basedataservice.rpc
