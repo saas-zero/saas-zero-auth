@@ -1,0 +1,17 @@
+Name: authservice.api
+Host: 0.0.0.0
+Port: 18081
+
+JwtSecret: saas-zero-secret-key-2024
+JwtExpire: 86400
+
+Etcd:
+  Hosts:
+    - 192.168.201.52:32384
+  Key: authservice.api
+
+BaseDataRpc:
+  Etcd:
+    Hosts:
+      - 192.168.201.52:32384
+    Key: basedataservice.rpc

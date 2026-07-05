@@ -1,5 +1,5 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
+// goctl 1.10.1
 
 package logic
 
@@ -29,12 +29,5 @@ func NewOauthCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OauthCo
 func (l *OauthCodeLogic) OauthCode() (resp *types.BaseResp, err error) {
 	// todo: add your logic here and delete this line
 
-	l.Logger.Infof("OauthCode")
-
-	// 添加正确的返回值
-	return &types.BaseResp{
-		Code: 0,
-		Msg:  "success",
-		Data: nil,
-	}, nil
+	return
 }

@@ -1,5 +1,5 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
+// goctl 1.10.1
 
 package main
 
@@ -15,7 +15,7 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "D:\\GolandProjects\\saas-zero\\apps\\saas-zero-auth\\api\\etc\\authapis.yaml", "the config file")
+var configFile = flag.String("f", "etc/authapis.yaml", "the config file")
 
 func main() {
 	flag.Parse()

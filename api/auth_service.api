@@ -7,19 +7,43 @@ type (
 		Username string `json:"username"`
 		Password string `json:"password"`
 	}
-	// 统一响应结构
-	OauthLoginResp {
-		Code int         `json:"code"`
-		Msg  string      `json:"msg"`
-		Data interface{} `json:"data,omitempty"` // 使用omitempty确保没有数据时此字段不会出现在JSON中
+	OauthRefreshReq {
+		Token string `json:"token"`
+	}
+	PasswordChangeReq {
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+	PasswordResetReq {
+		UserId      string `json:"userId"`
+		NewPassword string `json:"newPassword"`
 	}
 )
 
-// 定义 SysApis 服务
 service AuthApis {
-	// 定义客户端流式 rpc
 	@handler OauthLogin
-	post /oauth/login (OauthLoginReq) returns (OauthLoginResp)
+	post /oauth/login (OauthLoginReq) returns (BaseResp)
+
+	@handler OauthVerify
+	get /oauth/verify returns (BaseResp)
+
+	@handler OauthRefresh
+	post /oauth/refresh (OauthRefreshReq) returns (BaseResp)
+
+	@handler PasswordChange
+	post /oauth/password/change (PasswordChangeReq) returns (BaseResp)
+
+	@handler PasswordReset
+	post /oauth/password/reset (PasswordResetReq) returns (BaseResp)
+
+	@handler OauthUserInfo
+	get /oauth/userinfo returns (BaseResp)
+
+	@handler OauthMenus
+	get /oauth/menus returns (BaseResp)
+
+	@handler OauthPermissions
+	get /oauth/permissions returns (BaseResp)
 
 	@handler OauthCode
 	get /oauth/code returns (BaseResp)

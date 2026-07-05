@@ -1,5 +1,5 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
+// goctl 1.10.1
 
 package config
 
@@ -10,5 +10,7 @@ import (
 
 type Config struct {
 	rest.RestConf
+	JwtSecret   string `json:"jwtSecret"`
+	JwtExpire   int64  `json:"jwtExpire"`
 	BaseDataRpc zrpc.RpcClientConf
 }

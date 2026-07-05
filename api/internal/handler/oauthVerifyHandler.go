@@ -1,5 +1,4 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.2
 
 package handler
 
@@ -11,10 +10,11 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-func OauthCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func OauthVerifyHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		l := logic.NewOauthCodeLogic(r.Context(), svcCtx)
-		resp, err := l.OauthCode()
+		ctx := logic.WithToken(r.Context(), logic.ExtractBearerToken(r.Header.Get("Authorization")))
+		l := logic.NewOauthVerifyLogic(ctx, svcCtx)
+		resp, err := l.OauthVerify()
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {
