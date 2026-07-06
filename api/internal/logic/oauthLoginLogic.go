@@ -49,9 +49,10 @@ func (l *OauthLoginLogic) OauthLogin(req *types.OauthLoginReq) (resp *types.Base
 		return &types.BaseResp{Code: 2, Msg: "密码错误"}, nil
 	}
 	token, err := jwt.Sign(l.svcCtx.Config.JwtSecret, &jwt.Claims{
-		UserId:   user.GetId(),
-		TenantId: user.GetTenantId(),
-		UserName: user.GetUsername(),
+		UserId:    user.GetId(),
+		TenantId:  user.GetTenantId(),
+		UserName:  user.GetUsername(),
+		RoleCodes: user.GetRoleCodes(),
 	}, time.Duration(l.svcCtx.Config.JwtExpire)*time.Second)
 	if err != nil {
 		return nil, err
