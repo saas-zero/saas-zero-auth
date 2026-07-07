@@ -6,13 +6,13 @@ package svc
 import (
 	"github.com/saas-zero/saas-zero-auth/api/internal/config"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
-	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/saas-zero/saas-zero-common/pkg/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
 	Config     config.Config
-	Redis      *redis.Redis
+	Redis      *redis.Client
 	SysUsers   apps.SysUsersClient
 	SysTenants apps.SysTenantsClient
 	SysMenus   apps.SysMenusClient
@@ -21,7 +21,7 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	cli := zrpc.MustNewClient(c.BaseDataRpc)
-	rds, err := redis.NewRedis(c.Redis)
+	rds, err := redis.NewClient(c.Redis)
 	if err != nil {
 		panic(err)
 	}

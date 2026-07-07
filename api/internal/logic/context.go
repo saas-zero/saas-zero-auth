@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
-	"github.com/zeromicro/go-zero/core/stores/redis"
+	"github.com/saas-zero/saas-zero-common/pkg/redis"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -37,7 +37,7 @@ func ExtractBearerToken(authHeader string) string {
 	return ""
 }
 
-func tokenExistsInRedis(rds *redis.Redis, jti string) bool {
+func tokenExistsInRedis(rds *redis.Client, jti string) bool {
 	if jti == "" {
 		return false
 	}
