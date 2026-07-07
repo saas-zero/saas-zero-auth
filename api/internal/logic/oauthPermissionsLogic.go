@@ -8,6 +8,7 @@ import (
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +29,7 @@ func NewOauthPermissionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 
 func (l *OauthPermissionsLogic) OauthPermissions() (resp *types.BaseResp, err error) {
 	if _, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret); err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	apiResp, err := l.svcCtx.SysApis.GetApiList(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.ApiPageReq{})
 	if err != nil {
@@ -43,6 +44,6 @@ func (l *OauthPermissionsLogic) OauthPermissions() (resp *types.BaseResp, err er
 		perms = []string{}
 	}
 	return &types.BaseResp{
-		Code: 0, Msg: "success", Data: perms,
+		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: perms,
 	}, nil
 }

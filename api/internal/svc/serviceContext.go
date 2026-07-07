@@ -10,18 +10,20 @@ import (
 )
 
 type ServiceContext struct {
-	Config   config.Config
-	SysUsers apps.SysUsersClient
-	SysMenus apps.SysMenusClient
-	SysApis  apps.SysApisClient
+	Config     config.Config
+	SysUsers   apps.SysUsersClient
+	SysTenants apps.SysTenantsClient
+	SysMenus   apps.SysMenusClient
+	SysApis    apps.SysApisClient
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	cli := zrpc.MustNewClient(c.BaseDataRpc)
 	return &ServiceContext{
-		Config:   c,
-		SysUsers: apps.NewSysUsersClient(cli.Conn()),
-		SysMenus: apps.NewSysMenusClient(cli.Conn()),
-		SysApis:  apps.NewSysApisClient(cli.Conn()),
+		Config:     c,
+		SysUsers:   apps.NewSysUsersClient(cli.Conn()),
+		SysTenants: apps.NewSysTenantsClient(cli.Conn()),
+		SysMenus:   apps.NewSysMenusClient(cli.Conn()),
+		SysApis:    apps.NewSysApisClient(cli.Conn()),
 	}
 }

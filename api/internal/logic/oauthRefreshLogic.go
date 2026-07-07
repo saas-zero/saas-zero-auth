@@ -8,6 +8,7 @@ import (
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,7 +34,7 @@ func (l *OauthRefreshLogic) OauthRefresh(req *types.OauthRefreshReq) (resp *type
 	}
 	claims, err := jwt.Parse(token, l.svcCtx.Config.JwtSecret)
 	if err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	newToken, err := jwt.Sign(l.svcCtx.Config.JwtSecret, &jwt.Claims{
 		UserId:   claims.UserId,
@@ -44,8 +45,8 @@ func (l *OauthRefreshLogic) OauthRefresh(req *types.OauthRefreshReq) (resp *type
 		return nil, err
 	}
 	return &types.BaseResp{
-		Code: 0,
-		Msg:  "success",
+		Code: errno.Success.Code,
+		Msg:  errno.Success.Msg,
 		Data: map[string]string{"token": newToken},
 	}, nil
 }

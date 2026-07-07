@@ -8,6 +8,7 @@ import (
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,7 +30,7 @@ func NewOauthUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Oau
 func (l *OauthUserInfoLogic) OauthUserInfo() (resp *types.BaseResp, err error) {
 	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
 	if err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	userResp, err := l.svcCtx.SysUsers.GetUserById(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.IdReq{Id: claims.UserId})
 	if err != nil {
@@ -37,9 +38,9 @@ func (l *OauthUserInfoLogic) OauthUserInfo() (resp *types.BaseResp, err error) {
 	}
 	user := userResp.GetData()
 	if user == nil {
-		return &types.BaseResp{Code: 1, Msg: "用户不存在"}, nil
+		return &types.BaseResp{Code: errno.UserNotFound.Code, Msg: errno.UserNotFound.Msg}, nil
 	}
 	return &types.BaseResp{
-		Code: 0, Msg: "success", Data: user,
+		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: user,
 	}, nil
 }

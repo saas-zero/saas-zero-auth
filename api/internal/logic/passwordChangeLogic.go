@@ -9,6 +9,7 @@ import (
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
 	"github.com/saas-zero/saas-zero-common/pkg/bcrypt"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/proto"
@@ -31,7 +32,7 @@ func NewPasswordChangeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pa
 func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp *types.BaseResp, err error) {
 	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
 	if err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	ctx := withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret)
 	userResp, err := l.svcCtx.SysUsers.GetUserById(ctx, &apps.IdReq{Id: claims.UserId})
@@ -40,10 +41,10 @@ func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp
 	}
 	user := userResp.GetData()
 	if user == nil {
-		return &types.BaseResp{Code: 1, Msg: "用户不存在"}, nil
+		return &types.BaseResp{Code: errno.UserNotFound.Code, Msg: errno.UserNotFound.Msg}, nil
 	}
 	if !bcrypt.Verify(req.OldPassword, user.GetPassword()) {
-		return &types.BaseResp{Code: 2, Msg: "旧密码错误"}, nil
+		return &types.BaseResp{Code: errno.OldPasswordWrong.Code, Msg: errno.OldPasswordWrong.Msg}, nil
 	}
 	hash, err := bcrypt.Hash(req.NewPassword)
 	if err != nil {
@@ -56,5 +57,5 @@ func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp
 	if err != nil {
 		return nil, err
 	}
-	return &types.BaseResp{Code: 0, Msg: "密码修改成功"}, nil
+	return &types.BaseResp{Code: errno.Success.Code, Msg: "密码修改成功"}, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,13 +29,13 @@ func NewOauthMenusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OauthM
 
 func (l *OauthMenusLogic) OauthMenus() (resp *types.BaseResp, err error) {
 	if _, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret); err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	treeResp, err := l.svcCtx.SysMenus.GetMenuTree(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.EmptyReq{})
 	if err != nil {
 		return nil, err
 	}
 	return &types.BaseResp{
-		Code: 0, Msg: "success", Data: treeResp.GetData(),
+		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: treeResp.GetData(),
 	}, nil
 }

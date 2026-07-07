@@ -7,6 +7,7 @@ import (
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,11 +29,11 @@ func NewOauthVerifyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Oauth
 func (l *OauthVerifyLogic) OauthVerify() (resp *types.BaseResp, err error) {
 	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
 	if err != nil {
-		return &types.BaseResp{Code: 3, Msg: "token无效或已过期"}, nil
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	return &types.BaseResp{
-		Code: 0,
-		Msg:  "success",
+		Code: errno.Success.Code,
+		Msg:  errno.Success.Msg,
 		Data: map[string]interface{}{
 			"userId":   claims.UserId,
 			"tenantId": claims.TenantId,

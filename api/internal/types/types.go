@@ -18,8 +18,9 @@ type IdsReq struct {
 }
 
 type OauthLoginReq struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	TenantCode string `json:"tenantCode"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
 }
 
 type OauthRefreshReq struct {
