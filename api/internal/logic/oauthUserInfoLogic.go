@@ -32,6 +32,9 @@ func (l *OauthUserInfoLogic) OauthUserInfo() (resp *types.BaseResp, err error) {
 	if err != nil {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
+	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	}
 	userResp, err := l.svcCtx.SysUsers.GetUserById(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.IdReq{Id: claims.UserId})
 	if err != nil {
 		return nil, err

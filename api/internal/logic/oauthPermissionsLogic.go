@@ -28,7 +28,11 @@ func NewOauthPermissionsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 }
 
 func (l *OauthPermissionsLogic) OauthPermissions() (resp *types.BaseResp, err error) {
-	if _, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret); err != nil {
+	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
+	if err != nil {
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	}
+	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	apiResp, err := l.svcCtx.SysApis.GetApiList(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.ApiPageReq{})

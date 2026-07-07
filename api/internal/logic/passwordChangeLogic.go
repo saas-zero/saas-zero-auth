@@ -34,6 +34,9 @@ func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp
 	if err != nil {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
+	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	}
 	ctx := withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret)
 	userResp, err := l.svcCtx.SysUsers.GetUserById(ctx, &apps.IdReq{Id: claims.UserId})
 	if err != nil {

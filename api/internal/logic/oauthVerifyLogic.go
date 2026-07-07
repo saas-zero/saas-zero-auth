@@ -4,6 +4,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
@@ -27,8 +28,15 @@ func NewOauthVerifyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Oauth
 }
 
 func (l *OauthVerifyLogic) OauthVerify() (resp *types.BaseResp, err error) {
-	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
+	tokenStr := GetToken(l.ctx)
+	claims, err := jwt.Parse(tokenStr, l.svcCtx.Config.JwtSecret)
 	if err != nil {
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	}
+	// Verify token exists in Redis
+	key := fmt.Sprintf("token:%s", claims.ID)
+	exists, err := l.svcCtx.Redis.Exists(key)
+	if err != nil || exists == false {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	return &types.BaseResp{

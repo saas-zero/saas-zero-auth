@@ -2,10 +2,12 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
+	"github.com/zeromicro/go-zero/core/stores/redis"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -33,6 +35,15 @@ func ExtractBearerToken(authHeader string) string {
 		return parts[1]
 	}
 	return ""
+}
+
+func tokenExistsInRedis(rds *redis.Redis, jti string) bool {
+	if jti == "" {
+		return false
+	}
+	key := fmt.Sprintf("token:%s", jti)
+	exists, err := rds.Exists(key)
+	return err == nil && exists
 }
 
 func withAuthContext(ctx context.Context, secret string) context.Context {

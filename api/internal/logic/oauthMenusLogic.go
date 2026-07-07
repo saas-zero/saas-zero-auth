@@ -28,7 +28,11 @@ func NewOauthMenusLogic(ctx context.Context, svcCtx *svc.ServiceContext) *OauthM
 }
 
 func (l *OauthMenusLogic) OauthMenus() (resp *types.BaseResp, err error) {
-	if _, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret); err != nil {
+	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
+	if err != nil {
+		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	}
+	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
 	treeResp, err := l.svcCtx.SysMenus.GetMenuTree(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.EmptyReq{})

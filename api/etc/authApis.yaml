@@ -5,6 +5,11 @@ Port: 18081
 JwtSecret: saas-zero-secret-key-2024
 JwtExpire: 86400
 
+Redis:
+  Host: 192.168.201.188:6379
+  Pass: "redis.123456"
+  Type: node
+
 Etcd:
   Hosts:
     - 192.168.201.52:32384

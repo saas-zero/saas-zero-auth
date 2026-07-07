@@ -21,6 +21,8 @@ type OauthLoginReq struct {
 	TenantCode string `json:"tenantCode"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
+	CaptchaId  string `json:"captchaId,optional"`
+	CaptchaVal string `json:"captchaVal,optional"`
 }
 
 type OauthRefreshReq struct {
