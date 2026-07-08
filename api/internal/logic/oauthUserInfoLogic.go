@@ -43,7 +43,9 @@ func (l *OauthUserInfoLogic) OauthUserInfo() (resp *types.BaseResp, err error) {
 	if user == nil {
 		return &types.BaseResp{Code: errno.UserNotFound.Code, Msg: errno.UserNotFound.Msg}, nil
 	}
+	userData := user
+	userData.RoleCodes = claims.RoleCodes
 	return &types.BaseResp{
-		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: user,
+		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: userData,
 	}, nil
 }

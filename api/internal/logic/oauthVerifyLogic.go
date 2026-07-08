@@ -43,9 +43,10 @@ func (l *OauthVerifyLogic) OauthVerify() (resp *types.BaseResp, err error) {
 		Code: errno.Success.Code,
 		Msg:  errno.Success.Msg,
 		Data: map[string]interface{}{
-			"userId":   claims.UserId,
-			"tenantId": claims.TenantId,
-			"userName": claims.UserName,
+			"userId":    claims.UserId,
+			"tenantId":  claims.TenantId,
+			"userName":  claims.UserName,
+			"roleCodes": claims.RoleCodes,
 		},
 	}, nil
 }
