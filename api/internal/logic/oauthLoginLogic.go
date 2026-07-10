@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/saas-zero/saas-zero-auth/api/internal/middleware"
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
@@ -80,10 +81,22 @@ func (l *OauthLoginLogic) OauthLogin(req *types.OauthLoginReq) (resp *types.Base
 		return &types.BaseResp{Code: errno.UserNotFound.Code, Msg: errno.UserNotFound.Msg}, nil
 	}
 
+	clientIP := middleware.GetClientIP(l.ctx)
+
+	// 2.5 Lockout pre-check: reject if the account is currently locked.
+	if user.GetLockoutUntil() > time.Now().UnixMilli() {
+		return &types.BaseResp{Code: errno.AccountLocked.Code, Msg: errno.AccountLocked.Msg}, nil
+	}
+
 	// 3. Verify password
 	if !bcrypt.Verify(req.Password, user.GetPassword()) {
+		// Record failure: increments error count, may lock the account, writes login log.
+		l.recordLogin(authCtx, user.GetId(), user.GetUsername(), clientIP, tenantId, false, errno.WrongPassword.Msg)
 		return &types.BaseResp{Code: errno.WrongPassword.Code, Msg: errno.WrongPassword.Msg}, nil
 	}
+
+	// Record success: resets error count, updates last-login info, writes login log.
+	l.recordLogin(authCtx, user.GetId(), user.GetUsername(), clientIP, tenantId, true, "登录成功")
 
 	// 4. Fetch role codes for JWT claims so that subsequent API requests
 	// can be authorized by CasbinAuth middleware without additional gRPC calls.
@@ -131,4 +144,20 @@ func (l *OauthLoginLogic) OauthLogin(req *types.OauthLoginReq) (resp *types.Base
 			"tenantCode": req.TenantCode,
 		},
 	}, nil
+}
+
+// recordLogin 调用 basedata RPC 记录一次登录结果（锁定计数 + 登录审计日志）。
+// 失败不阻断登录主流程，仅记录日志。
+func (l *OauthLoginLogic) recordLogin(ctx context.Context, userId int64, username, ip string, tenantId int64, success bool, message string) {
+	_, err := l.svcCtx.SysUsers.RecordLoginResult(ctx, &apps.LoginRecordReq{
+		UserId:   proto.Int64(userId),
+		Username: proto.String(username),
+		Ip:       proto.String(ip),
+		Success:  proto.Bool(success),
+		Message:  proto.String(message),
+		TenantId: proto.Int64(tenantId),
+	})
+	if err != nil {
+		logx.WithContext(l.ctx).Errorf("record login result error: %v", err)
+	}
 }
