@@ -1,6 +1,7 @@
 Name: authservice.api
 Host: 0.0.0.0
 Port: 18081
+Timeout: 10000
 
 JwtSecret: saas-zero-secret-key-2024
 JwtExpire: 86400
