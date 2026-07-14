@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"github.com/saas-zero/saas-zero-common/pkg/id"
 	"strings"
 
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
@@ -56,8 +56,8 @@ func withAuthContext(ctx context.Context, secret string) context.Context {
 		return ctx
 	}
 	return metadata.NewOutgoingContext(ctx, metadata.Pairs(
-		"x-user-id", strconv.FormatInt(claims.UserId, 10),
+		"x-user-id", id.ToString(claims.UserId),
 		"x-user-name", claims.UserName,
-		"x-tenant-id", strconv.FormatInt(claims.TenantId, 10),
+		"x-tenant-id", id.ToString(claims.TenantId),
 	))
 }

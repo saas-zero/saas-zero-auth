@@ -5,7 +5,7 @@ package logic
 import (
 	"context"
 	"fmt"
-	"strconv"
+	"github.com/saas-zero/saas-zero-common/pkg/id"
 	"time"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/middleware"
@@ -62,7 +62,7 @@ func (l *OauthLoginLogic) OauthLogin(req *types.OauthLoginReq) (resp *types.Base
 		return &types.BaseResp{Code: errno.TenantNotFound.Code, Msg: errno.TenantNotFound.Msg}, nil
 	}
 	tenantId := tenantResp.GetData().GetId()
-	tenantIdStr := strconv.FormatInt(tenantId, 10)
+	tenantIdStr := id.ToString(tenantId)
 
 	// 2. Look up user by tenant + username
 	authCtx = metadata.NewOutgoingContext(l.ctx, metadata.Pairs(
