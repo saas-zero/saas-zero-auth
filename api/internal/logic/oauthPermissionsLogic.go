@@ -35,19 +35,27 @@ func (l *OauthPermissionsLogic) OauthPermissions() (resp *types.BaseResp, err er
 	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
 		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
 	}
-	apiResp, err := l.svcCtx.SysApis.GetApiList(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.ApiPageReq{})
+	treeResp, err := l.svcCtx.SysMenus.GetMenuTree(withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret), &apps.EmptyReq{})
 	if err != nil {
 		return nil, err
 	}
-	list := apiResp.GetList()
-	perms := make([]string, len(list))
-	for i, a := range list {
-		perms[i] = a.GetApiPath()
-	}
+	// 权限码来自 button 类型菜单的 path 字段（如 "system:user:create"）
+	perms := collectButtonPerms(treeResp.GetData())
 	if perms == nil {
 		perms = []string{}
 	}
 	return &types.BaseResp{
 		Code: errno.Success.Code, Msg: errno.Success.Msg, Data: perms,
 	}, nil
+}
+
+func collectButtonPerms(menus []*apps.Menu) []string {
+	perms := []string{}
+	for _, m := range menus {
+		if m.GetMenuType() == "button" && m.GetPath() != "" {
+			perms = append(perms, m.GetPath())
+		}
+		perms = append(perms, collectButtonPerms(m.GetChildren())...)
+	}
+	return perms
 }
