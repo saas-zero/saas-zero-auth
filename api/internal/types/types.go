@@ -10,11 +10,11 @@ type BaseResp struct {
 }
 
 type IdReq struct {
-	Id int64 `path:"id"`
+	Id string `path:"id"`
 }
 
 type IdsReq struct {
-	Ids []int64 `json:"ids"`
+	Ids []string `json:"ids"`
 }
 
 type OauthLoginReq struct {

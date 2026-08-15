@@ -50,7 +50,7 @@ Redis:
   DB: 0                                # 0=go-zero, >0=go-redis
 BaseDataRpc:
   Etcd:
-    Hosts: ["127.0.0.1:2379"]
+    Hosts: ["127.0.0.1:22379"]
     Key: basedataservice.rpc
 ```
 
