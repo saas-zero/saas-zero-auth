@@ -4,6 +4,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
@@ -60,5 +61,7 @@ func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp
 	if err != nil {
 		return nil, err
 	}
+	// 修改密码后递增 token_version，使该用户所有旧 token 失效（强制重新登录）
+	l.svcCtx.Redis.Incr(fmt.Sprintf("token_version:%d", claims.UserId))
 	return &types.BaseResp{Code: errno.Success.Code, Msg: "密码修改成功"}, nil
 }

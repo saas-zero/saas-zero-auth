@@ -4,6 +4,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
@@ -45,5 +46,7 @@ func (l *PasswordResetLogic) PasswordReset(req *types.PasswordResetReq) (resp *t
 	if err != nil {
 		return nil, err
 	}
+	// 重置密码后递增 token_version，使该用户所有旧 token 失效（强制重新登录）
+	l.svcCtx.Redis.Incr(fmt.Sprintf("token_version:%d", userId))
 	return &types.BaseResp{Code: errno.Success.Code, Msg: "密码重置成功"}, nil
 }
