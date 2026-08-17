@@ -33,10 +33,13 @@ POST /oauth/login {"tenantCode":"default","username":"admin","password":"***","c
   ├─ 1. captchaId 非空 → 从 Redis 校验验证码 → 删除
   ├─ 2. gRPC → basedata: GetTenantByCode → tenantId
   ├─ 3. gRPC → basedata: GetUserByUsername(tenantId, username)
+  ├─ 3.5 锁定检查 + 状态检查（status != active → 拒绝登录）
   ├─ 4. bcrypt.Verify(password, user.Password)
-  ├─ 5. INCR token_version:{userId}（Redis）→ 写入 Claims
+  ├─ 5. 读取 token_version:{userId}（不递增，多端共存）→ Setex 确保 key 创建
   └─ 6. jwt.Sign → SETEX token:{jti}（Redis）→ 返回 token
 ```
+
+> **token_version 策略**：登录**不 INCR**（避免多标签/多端互相踢出），只读取当前版本并 `Setex` 确保 key 存在（首次登录，否则 jwtauth 校验 key 不存在误判 401）。权限变更（分配角色/API、角色改 code、禁用角色、改用户角色）、密码变更、禁用/删除用户时会 INCR 使旧 token 失效。
 
 ## 配置项
 
@@ -44,8 +47,8 @@ POST /oauth/login {"tenantCode":"default","username":"admin","password":"***","c
 JwtSecret: saas-zero-secret-key-2024  # JWT 签名密钥
 JwtExpire: 86400                       # Token 过期秒数
 Redis:
-  Host: 127.0.0.1:6379
-  Pass: ""
+  Host: 127.0.0.1:26379
+  Pass: "Redis.123456"
   Type: node
   DB: 0                                # 0=go-zero, >0=go-redis
 BaseDataRpc:
