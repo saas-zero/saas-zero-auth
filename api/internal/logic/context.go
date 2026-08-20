@@ -6,6 +6,7 @@ import (
 	"github.com/saas-zero/saas-zero-common/pkg/id"
 	"strings"
 
+	"github.com/saas-zero/saas-zero-common/pkg/errno"
 	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/saas-zero/saas-zero-common/pkg/redis"
 	"google.golang.org/grpc/metadata"
@@ -44,6 +45,43 @@ func tokenExistsInRedis(rds *redis.Client, jti string) bool {
 	key := fmt.Sprintf("token:%s", jti)
 	exists, err := rds.Exists(key)
 	return err == nil && exists
+}
+
+// tokenVersionMatches verifies the JWT tokenVersion equals the current
+// per-user version in Redis. Passwords, roles and permissions changes bump
+// this value so that stale sessions cannot be refreshed into new privileges.
+func tokenVersionMatches(rds *redis.Client, claims *jwt.Claims) bool {
+	if claims == nil {
+		return false
+	}
+	key := fmt.Sprintf("token_version:%d", claims.UserId)
+	cur, err := rds.Get(key)
+	if err != nil || cur == "" || cur != fmt.Sprintf("%d", claims.TokenVersion) {
+		return false
+	}
+	return true
+}
+
+// validateSession is the unified Auth validation chain: JWT signature +
+// expiry, Redis JTI existence and per-user tokenVersion. It is shared by
+// /oauth/userinfo, /oauth/menus, /oauth/permissions, /oauth/refresh,
+// password change and password reset so a revoked token is rejected the same
+// way everywhere.
+func validateSession(rds *redis.Client, secret, token string) (*jwt.Claims, *errno.Errno) {
+	if token == "" {
+		return nil, errno.TokenExpired
+	}
+	claims, err := jwt.Parse(token, secret)
+	if err != nil {
+		return nil, errno.TokenExpired
+	}
+	if !tokenExistsInRedis(rds, claims.ID) {
+		return nil, errno.TokenInvalidated
+	}
+	if !tokenVersionMatches(rds, claims) {
+		return nil, errno.TokenVersionMismatch
+	}
+	return claims, nil
 }
 
 func withAuthContext(ctx context.Context, secret string) context.Context {

@@ -11,7 +11,6 @@ import (
 	"github.com/saas-zero/saas-zero-basedata/rpc/apps"
 	"github.com/saas-zero/saas-zero-common/pkg/bcrypt"
 	"github.com/saas-zero/saas-zero-common/pkg/errno"
-	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/proto"
 )
@@ -31,15 +30,13 @@ func NewPasswordChangeLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pa
 }
 
 func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp *types.BaseResp, err error) {
-	claims, err := jwt.Parse(GetToken(l.ctx), l.svcCtx.Config.JwtSecret)
-	if err != nil {
-		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
-	}
-	if !tokenExistsInRedis(l.svcCtx.Redis, claims.ID) {
-		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	// 统一会话校验：签名 + 有效期 + Redis JTI + tokenVersion
+	claims, ok := validateSession(l.svcCtx.Redis, l.svcCtx.Config.JwtSecret, GetToken(l.ctx))
+	if ok != nil {
+		return &types.BaseResp{Code: ok.Code, Msg: ok.Msg}, nil
 	}
 	ctx := withAuthContext(l.ctx, l.svcCtx.Config.JwtSecret)
-	userResp, err := l.svcCtx.SysUsers.GetUserById(ctx, &apps.IdReq{Id: claims.UserId})
+	userResp, err := l.svcCtx.SysUsers.GetUserByUsername(ctx, &apps.UserReq{Username: proto.String(claims.UserName)})
 	if err != nil {
 		return nil, err
 	}
@@ -50,13 +47,10 @@ func (l *PasswordChangeLogic) PasswordChange(req *types.PasswordChangeReq) (resp
 	if !bcrypt.Verify(req.OldPassword, user.GetPassword()) {
 		return &types.BaseResp{Code: errno.OldPasswordWrong.Code, Msg: errno.OldPasswordWrong.Msg}, nil
 	}
-	hash, err := bcrypt.Hash(req.NewPassword)
-	if err != nil {
-		return nil, err
-	}
+	// Password is hashed exactly once at the Basedata RPC boundary.
 	_, err = l.svcCtx.SysUsers.ResetPassword(ctx, &apps.UserReq{
 		Id:       proto.Int64(claims.UserId),
-		Password: proto.String(hash),
+		Password: proto.String(req.NewPassword),
 	})
 	if err != nil {
 		return nil, err

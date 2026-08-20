@@ -4,12 +4,10 @@ package logic
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/saas-zero/saas-zero-auth/api/internal/svc"
 	"github.com/saas-zero/saas-zero-auth/api/internal/types"
 	"github.com/saas-zero/saas-zero-common/pkg/errno"
-	"github.com/saas-zero/saas-zero-common/pkg/jwt"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -28,16 +26,10 @@ func NewOauthVerifyLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Oauth
 }
 
 func (l *OauthVerifyLogic) OauthVerify() (resp *types.BaseResp, err error) {
-	tokenStr := GetToken(l.ctx)
-	claims, err := jwt.Parse(tokenStr, l.svcCtx.Config.JwtSecret)
-	if err != nil {
-		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
-	}
-	// Verify token exists in Redis
-	key := fmt.Sprintf("token:%s", claims.ID)
-	exists, err := l.svcCtx.Redis.Exists(key)
-	if err != nil || exists == false {
-		return &types.BaseResp{Code: errno.TokenExpired.Code, Msg: errno.TokenExpired.Msg}, nil
+	// 统一会话校验：签名 + 有效期 + Redis JTI + tokenVersion
+	claims, ok := validateSession(l.svcCtx.Redis, l.svcCtx.Config.JwtSecret, GetToken(l.ctx))
+	if ok != nil {
+		return &types.BaseResp{Code: ok.Code, Msg: ok.Msg}, nil
 	}
 	return &types.BaseResp{
 		Code: errno.Success.Code,
