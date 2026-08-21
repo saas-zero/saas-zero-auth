@@ -14,11 +14,11 @@ Redis:
 
 Etcd:
   Hosts:
-    - 192.168.201.52:32384
+    - 192.168.201.81:32379
   Key: authservice.api
 
 BaseDataRpc:
   Etcd:
     Hosts:
-      - 192.168.201.52:32384
+      - 192.168.201.81:32379
     Key: basedataservice.rpc
