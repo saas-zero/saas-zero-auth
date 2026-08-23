@@ -8,7 +8,7 @@
 |---|---|
 | 端口 | `:18081`（HTTP API） |
 | 路由前缀 | `/oauth/*` |
-| 入口文件 | `api/authservice.go` |
+| 入口文件 | `api/authapis.go` |
 | 配置 | `api/etc/authApis.yaml` |
 
 ## 功能
@@ -64,7 +64,7 @@ BaseDataRpc:
 go run ./apps/saas-zero-auth/api
 # 或进入目录
 cd apps/saas-zero-auth/api
-go run authservice.go -f etc/authApis.yaml
+go run authapis.go -f etc/authApis.yaml
 ```
 
 ## 依赖
